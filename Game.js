@@ -74,7 +74,7 @@ function GameInner({ user, elementSetId }) {
   const [musicOn, setMusicOnInner] = useState(true);
   const [keyInputVisible, setKeyInputVisible] = useState(false);
   const [encyclopediaCurrentElement, setEncyclopediaCurrentElement] = useState();
-  const [isShowingCrossword, setIsShowingCrossword] = useState(true);
+  const [isShowingCrossword, setIsShowingCrossword] = useState(false);
   const maxIdRef = useRef(0);
 
   const setMusicOn = on => {
