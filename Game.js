@@ -583,29 +583,29 @@ function GameInner({ user, elementSetId }) {
             />}
           <div className={classes.hud}>
             <IconButton aria-label="Очистить" onClick={e => clearBoard()}>
-              <DeleteIcon />
+              <span className="left-menu-btn clear-btn" />
             </IconButton>
             <br />
             <IconButton aria-label="Энциклопедия" onClick={e => setEncyclopediaVisible(true)}>
-              <DescriptionIcon />
+              <span className="left-menu-btn encyclopedia-btn" />
             </IconButton>
             <br />
             <IconButton aria-label="Звук" onClick={e => setMusicOn(!musicOn)}>
               {musicOn ?
-                <VolumeUpIcon /> :
-                <VolumeOffIcon />}
+                <span className="left-menu-btn music-on-btn" /> :
+                <span className="left-menu-btn music-off-btn" />}
             </IconButton>
             <br />
             <IconButton aria-label="Ключ" onClick={e => setKeyInputVisible(true)}>
-              <VpnKeyIcon />
+              <span className="left-menu-btn key-btn" />
             </IconButton>
             <br />
             <IconButton aria-label="Следующая тема" onClick={setNextTheme}>
-              <InvertColorsIcon />
+              <span className="left-menu-btn back-btn" />
             </IconButton>
             <br />
             <IconButton aria-label="Об игре" onClick={e => setAboutVisible(true)}>
-              <PeopleIcon />
+              <span className="left-menu-btn about-btn" />
             </IconButton>
           </div>
           {lastDiscoveredElements.length > 0 &&
