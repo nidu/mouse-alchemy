@@ -37,15 +37,24 @@ function collectDrop(connect, monitor) {
   };
 }
 
-function Sidebar({ elements, connectDropTarget, onDrop, lastBadMixInfo }) {
+function Sidebar({ 
+  elements, 
+  connectDropTarget,
+  onDrop,
+  lastBadMixInfo,
+  onHideElement
+}) {
   const classes = useStyles();
 
-  const listItems = elements.map(element => {
+  const listItems = elements.map(({element, canBeHidden}) => {
     return (
       <ListItem key={element.id}>
         <ElementListItem 
           key={element.id} 
           element={element} 
+          onClick={canBeHidden ? () => {
+            onHideElement(element);
+          } : undefined}
         />
       </ListItem>
     )

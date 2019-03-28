@@ -66,11 +66,11 @@ class IconInner extends React.Component {
 
 const Icon = DragSource("element", elementListItemSource, collectDrag)(IconInner)
 
-function ElementListItem({ element, className, x, y, shake }) {
+function ElementListItem({ element, className, x, y, shake, onClick }) {
   const classes = useStyles();
 
   return (
-    <div className={classes.listItem}>
+    <div className={classes.listItem} onClick={onClick}>
       <Icon
         element={element}
         classes={classes}

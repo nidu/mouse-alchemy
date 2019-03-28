@@ -122,7 +122,11 @@ function GameInner({ user, elementSetId }) {
   );
   const nonFinalDiscoveredElements = useMemo(() =>
     discoveredElements &&
-    discoveredElements.filter(e => !e.element.isFinal).map(e => e.element),
+    discoveredElements
+      .filter(e => !e.element.isFinal)
+      .map(e => {
+        for (const e of )
+      }),
     [discoveredElements]
   );
 
@@ -532,6 +536,14 @@ function GameInner({ user, elementSetId }) {
     nextTheme();
   }
 
+  const onHideElement = element => {
+    const newDiscoveredElements = discoveredElements.map(e => {
+      if (e.element.id == element.id) {
+        return {...e, }
+      }
+    })
+  };
+
   if (!game) {
     return <Loader message="Загрузка игры..." />;
   } else {
@@ -569,6 +581,7 @@ function GameInner({ user, elementSetId }) {
               <Sidebar
                 elements={nonFinalDiscoveredElements}
                 onDrop={removeNodeFromBoard}
+                onHideElement={onHideElement}
               />
             </Grid>]}
           <Cat shown={catShown} onClick={onCatClick} />
