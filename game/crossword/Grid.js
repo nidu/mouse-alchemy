@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, createRef } from "react";
 import { makeStyles } from "@material-ui/styles";
 import cx from "classnames";
 import Typography from '@material-ui/core/Typography';
@@ -51,12 +51,19 @@ function CellInput({
   onChange,
   onStopEdit
 }) {
+  const ref = createRef();
+
+  useEffect(() => {
+    ref.current.focus();
+  }, [pos]);
+
   return (
     <input
       className={classes.cellInput}
       style={{
         transform: cellTransform(pos.x, pos.y)
       }}
+      ref={ref}
       value=""
       onChange={e => {}}
       maxLength={1}
@@ -67,10 +74,10 @@ function CellInput({
           onStopEdit();
         } else if (e.key == "Backspace" || e.key == "Delete" || e.key == " ") {
           onChange(null);
-          onStopEdit();
+          onStopEdit(true);
         } else if (e.key.length == 1) {
           onChange(e.key.toUpperCase());
-          onStopEdit();
+          onStopEdit(true);
         }
       }}
     />
@@ -169,11 +176,35 @@ export default function Grid({
           text={crosswordProgress && crosswordProgress[posToKey(editedCell)]}
           classes={classes}
           onChange={onInput}
-          onStopEdit={() => setEditingState({
-            isEditing: false,
-            editedCellPos: undefined,
-            editedCell: undefined,
-          })}
+          onStopEdit={(goNext) => {
+            if (goNext) {
+              const {editedCell, editedCellPos} = editingState;
+              const newPos = {...editedCellPos};
+              if (editedCell.orientation == "horizontal" && editedCellPos.x < editedCell.x + editedCell.text.length - 1) {
+                newPos.x += 1;
+              } else if (editedCell.orientation == "vertical" && editedCellPos.y < editedCell.y + editedCell.text.length - 1) {
+                newPos.y += 1;
+              }
+              if (newPos.x != editedCellPos.x || newPos.y != editedCellPos.y) {
+                setEditingState({
+                  ...editingState,
+                  editedCellPos: newPos,
+                });
+              } else {
+                setEditingState({
+                  isEditing: false,
+                  editedCellPos: undefined,
+                  editedCell: undefined,
+                });
+              }
+            } else {
+              setEditingState({
+                isEditing: false,
+                editedCellPos: undefined,
+                editedCell: undefined,
+              });
+            }
+          }}
         />}
     </div>
   )

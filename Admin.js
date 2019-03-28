@@ -62,6 +62,9 @@ const useStyles = makeStyles(theme => {
       flex: "auto",
       overflow: "auto"
     },
+    marginLeft: {
+      marginLeft: 20
+    },
     elementList: {
       flex: "auto",
       width: '100%',
@@ -777,14 +780,14 @@ function ElementSetEditorInner({ match, history }) {
     });
   }
 
-  const setElementSetName = name => {
+  const updateElementSet = upd => {
     db.collection("elementSets")
       .doc(elementSetId)
-      .update({name})
+      .update(upd)
       .catch(console.error);
     setElementSet({
       ...elementSet,
-      name
+      ...upd
     });
   }
 
@@ -822,7 +825,15 @@ function ElementSetEditorInner({ match, history }) {
           id="elementSetName"
           label="Шаблон игры"
           value={elementSet ? elementSet.name : ""}
-          onChange={setElementSetName}
+          onChange={name => updateElementSet({name})}
+          margin="normal"
+        />
+        <TextInputOnEnter
+          id="crosswordHint"
+          label="Подсказка от кроссворда"
+          className={classes.marginLeft}
+          value={elementSet ? elementSet.crosswordHint : ""}
+          onChange={crosswordHint => updateElementSet({crosswordHint})}
           margin="normal"
         />
       </Typography>

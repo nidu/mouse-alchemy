@@ -40,6 +40,8 @@ import CrosswordWrapper from './game/crossword/Crossword';
 import SettingsContext from './shared/SettingsContext';
 import ThemeContext from './shared/ThemeContext';
 
+import {debounce} from "lodash";
+
 const useStyles = makeStyles(theme => ({
   game: {
     height: "100vh",
@@ -57,6 +59,7 @@ const useStyles = makeStyles(theme => ({
 function GameInner({ user, elementSetId }) {
   const [elements, setElements] = useState();
   const [crossword, setCrossword] = useState();
+  const [crosswordHint, setCrosswordHint] = useState();
   const [gameId, setGameId] = useState();
   const [game, setGame] = useState();
   const [settings, setSettings] = useState();
@@ -120,14 +123,34 @@ function GameInner({ user, elementSetId }) {
     .filter(e => !search || e.element.name.toLowerCase().indexOf(search) != -1),
     [game && game.discoveredElements, elements, search]
   );
+
+  const discoveredElementsById = useMemo(() => {
+    const discoveredElements = game && game.discoveredElements;
+    if (!discoveredElements) return {};
+    const dict = {};
+    for (const de of discoveredElements) {
+      dict[de.element.id] = de;
+    }
+    return dict;
+  }, [game && game.discoveredElements]);
+
   const nonFinalDiscoveredElements = useMemo(() =>
     discoveredElements &&
     discoveredElements
-      .filter(e => !e.element.isFinal)
-      .map(e => {
-        for (const e of )
+      .filter(e => !e.element.isFinal && !e.hidden)
+      .map(de => {
+        for (const e of elements) {
+          if (e.id != de.element.id && e.madeOf && !discoveredElementsById[e.id]) {
+            for (const {first, second} of e.madeOf) {
+              if (de.element.id == first.id || de.element.id == second.id) {
+                return de;
+              }
+            }
+          }
+        }
+        return {...de, canBeHidden: true};
       }),
-    [discoveredElements]
+    [discoveredElements, elements]
   );
 
   const elementsOnBoard = (game && game.elementsOnBoard || []).map((node, index) => ({
@@ -139,10 +162,11 @@ function GameInner({ user, elementSetId }) {
   const elementColl = db.collection(`elementSets/${elementSetId}/elements`)
   const elementRef = (id) =>
     elementColl.doc(id)
-  const updateGame = upd =>
+  const updateGame = useCallback(upd => {
     db.collection("games")
       .doc(gameId)
-      .update(upd);
+      .update(upd)
+  }, [gameId]);
 
   useEffect(() => {
     return db.collection("settings")
@@ -150,8 +174,12 @@ function GameInner({ user, elementSetId }) {
       .onSnapshot(doc => setSettings(doc.data()));
   }, []);
 
-  const onCrosswordChange = crosswordProgress => {
+  const updateCrossword = useCallback(debounce(crosswordProgress => {
     updateGame({crosswordProgress});
+  }, 3000), [updateGame]);
+
+  const onCrosswordChange = crosswordProgress => {
+    updateCrossword(crosswordProgress);
     setGame({...game, crosswordProgress});
   };
 
@@ -190,6 +218,7 @@ function GameInner({ user, elementSetId }) {
     ]).then(([elementSet, elements, gameDoc, settings, userSettings]) => {
       setElementsWithCalc(elements);
       setCrossword(elementSet.crosswordQuestions);
+      setCrosswordHint(elementSet.crosswordHint);
       setSettings(settings);
 
       if (userSettings) {
@@ -537,11 +566,16 @@ function GameInner({ user, elementSetId }) {
   }
 
   const onHideElement = element => {
-    const newDiscoveredElements = discoveredElements.map(e => {
+    const discoveredElements = game.discoveredElements.map(e => {
       if (e.element.id == element.id) {
-        return {...e, }
+        return {...e, hidden: true};
+      } else {
+        return e;
       }
-    })
+    });
+
+    setGame({...game, discoveredElements});
+    updateGame({discoveredElements});
   };
 
   if (!game) {
@@ -560,6 +594,7 @@ function GameInner({ user, elementSetId }) {
               crossword={crossword}
               crosswordProgress={crosswordProgress}
               crosswordSolved={crosswordSolved}
+              crosswordHint={crosswordHint}
               onChange={onCrosswordChange}
               onSolve={onCrosswordSolve}
               onHide={() => setIsShowingCrossword(false)}
@@ -631,6 +666,7 @@ function GameInner({ user, elementSetId }) {
             onClose={() => setKeyInputVisible(false)}
             startCrossword={() => {
               setIsShowingCrossword(true);
+              setSearch("");
               setKeyInputVisible(false);
             }}
             open={keyInputVisible}

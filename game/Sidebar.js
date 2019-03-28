@@ -52,7 +52,8 @@ function Sidebar({
         <ElementListItem 
           key={element.id} 
           element={element} 
-          onClick={canBeHidden ? () => {
+          canBeHidden={canBeHidden}
+          onRemove={canBeHidden ? () => {
             onHideElement(element);
           } : undefined}
         />

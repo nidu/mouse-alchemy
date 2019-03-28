@@ -51,6 +51,7 @@ function Crossword({
   crossword,
   crosswordProgress,
   crosswordSolved,
+  crosswordHint,
   onSolve,
   onChange,
   onHide
@@ -83,7 +84,7 @@ function Crossword({
 
   return (
     <div className={classes.container}>
-      {crosswordSolved && <SolvedDialog open onClose={onHide} number={9} />}
+      {crosswordSolved && <SolvedDialog open onClose={onHide} hint={crosswordHint} />}
       <div className={cx(classes.horizontalQuestions, classes.questions)}>
         <Typography variant="h6">По горизонтали</Typography>
         <QuestionList questions={horizontalQuestions} />
@@ -113,6 +114,7 @@ export default function CrosswordWrapper({
   crossword,
   crosswordProgress,
   crosswordSolved,
+  crosswordHint,
   onChange,
   onSolve,
   onHide
@@ -131,6 +133,7 @@ export default function CrosswordWrapper({
         crossword={crossword || []}
         crosswordProgress={crosswordProgress || {}}
         crosswordSolved={crosswordSolved}
+        crosswordHint={crosswordHint}
         onChange={onChange}
         onSolve={onSolve}
         onHide={onHide}

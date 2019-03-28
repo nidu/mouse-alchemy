@@ -6,15 +6,17 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
+import Typography from '@material-ui/core/Typography';
+
 import Button from '@material-ui/core/Button';
 
-export default function SolvedDialog({onClose, open, number}) {
+export default function SolvedDialog({onClose, open, hint}) {
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Поздравляю</DialogTitle>
       <DialogContent>
         <Typography>
-          Ваше число - {number}
+          Ваша подсказка - {hint}
         </Typography>
       </DialogContent>
       <DialogActions>

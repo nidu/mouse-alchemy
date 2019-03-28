@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend'
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
+import cx from "classnames";
+
 import ElementIcon from './ElementIcon';
+import FinalElementEffect from './FinalElementEffect';
 
 const useStyles = makeStyles(theme => ({
   name: {
@@ -14,7 +17,12 @@ const useStyles = makeStyles(theme => ({
   listItem: {
     display: "flex",
     alignItems: "center",
-    userSelect: "none"
+    userSelect: "none",
+    transition: "opacity 0.5s, transform 0.5s"
+  },
+  removing: {
+    transform: "scale(1.1)",
+    opacity: 0
   }
 }));
 
@@ -66,11 +74,21 @@ class IconInner extends React.Component {
 
 const Icon = DragSource("element", elementListItemSource, collectDrag)(IconInner)
 
-function ElementListItem({ element, className, x, y, shake, onClick }) {
+function ElementListItem({ element, className, x, y, shake, onRemove, canBeHidden }) {
   const classes = useStyles();
 
+  const [removing, setRemoving] = useState(false);
+
+  const onClick = () => {
+    setRemoving(true);
+    setTimeout(onRemove, 500);
+  };
+
   return (
-    <div className={classes.listItem} onClick={onClick}>
+    <div className={cx(classes.listItem, {
+      [classes.removing]: removing
+    })} onClick={onClick}>
+      {canBeHidden && <FinalElementEffect />}
       <Icon
         element={element}
         classes={classes}
