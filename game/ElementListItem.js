@@ -79,10 +79,10 @@ function ElementListItem({ element, className, x, y, shake, onRemove, canBeHidde
 
   const [removing, setRemoving] = useState(false);
 
-  const onClick = () => {
+  const onClick = canBeHidden ? () => {
     setRemoving(true);
     setTimeout(onRemove, 500);
-  };
+  } : undefined;
 
   return (
     <div className={cx(classes.listItem, {
