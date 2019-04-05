@@ -22,7 +22,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Tooltip from '@material-ui/core/Tooltip';
 import FormHelperText from '@material-ui/core/FormHelperText';

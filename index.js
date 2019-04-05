@@ -23,6 +23,9 @@ const themes = [
         default: "#cfdfde",
         paper: "#99cac7"
       }
+    },
+    typography: {
+      fontFamily: '"Arciform Sans cyr-lat Regular", "Roboto", "Helvetica", "Arial", sans-serif'
     }
   }),
   createMuiTheme({
@@ -31,6 +34,9 @@ const themes = [
         default: "#c4b2d4",
         paper: "#8a66ac"
       }
+    },
+    typography: {
+      fontFamily: '"Hangyaboly", "Roboto", "Helvetica", "Arial", sans-serif'
     }
   }),
   createMuiTheme({
@@ -39,6 +45,9 @@ const themes = [
         default: "#f5dbdb",
         paper: "#e9afaf"
       }
+    },
+    typography: {
+      fontFamily: '"Kurale", "Helvetica", "Arial", sans-serif'
     }
   }),
   createMuiTheme({
@@ -46,6 +55,9 @@ const themes = [
       final: {
         background: "#ccc"
       }
+    },
+    typography: {
+      fontFamily: '"PH 300 Cond Caps", "Roboto", "Helvetica", "Arial", sans-serif'
     }
   })
 ]

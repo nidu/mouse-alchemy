@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { makeStyles } from '@material-ui/styles';
-import Typography from '@material-ui/core/Typography';
+import * as firebase from "firebase";
 import classnames from 'classnames';
 
 const useStyles = makeStyles(theme => ({

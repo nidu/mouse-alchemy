@@ -112,7 +112,7 @@ export default function Grid({
     return maxX;
   }, [crossword]);
 
-  const cellNodes = useMemo(() => {
+  const cellNodes = (() => {
     let nodes = [];
     let visited = new Set();
 
@@ -154,7 +154,7 @@ export default function Grid({
     }
 
     return nodes;
-  }, [crossword, crosswordProgress]);
+  })();
 
   const onInput = text => {
     const { x, y } = editedCellPos

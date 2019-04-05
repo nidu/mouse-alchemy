@@ -4,7 +4,6 @@ import { DragSource, DropTarget } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend'
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
-import posed from 'react-pose';
 import classnames from 'classnames';
 
 import SettingsContext from '../shared/SettingsContext';

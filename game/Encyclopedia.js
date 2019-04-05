@@ -16,8 +16,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
@@ -163,11 +161,11 @@ function Encyclopedia({
 
   const filterLc = filter.toLowerCase();
   const discoveredElementList = discoveredElements
-    .filter(e => !filter || e.element.name.toLowerCase().startsWith(filter))
+    .filter(e => !filter || e.element.name.toLowerCase().startsWith(filterLc))
     .map(e => e.element);
 
   return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title"
+    <Dialog open={true} onClose={onClose} aria-labelledby="form-dialog-title"
       fullWidth={true} maxWidth="md">
       <DialogTitle id="form-dialog-title">
         <div style={{ display: "flex" }}>
