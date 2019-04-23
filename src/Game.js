@@ -89,6 +89,7 @@ function GameInner({ user, elementSetId }) {
       });
     }
     setElements(elements);
+    // setLastDiscoveredElements([elements[0]]);
   }
 
   const classes = useStyles();
