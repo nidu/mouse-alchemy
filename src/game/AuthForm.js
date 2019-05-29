@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
-import * as firebase from "firebase";
+import firebase from "../firebase";
 
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';

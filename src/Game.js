@@ -23,6 +23,7 @@ import Cat from './game/Cat';
 import DiscoveredElementPopup from './game/DiscoveredElementPopup';
 import Encyclopedia from './game/Encyclopedia';
 import KeyInputForm from './game/KeyInputForm';
+import TheEnd from './game/TheEnd';
 import CustomDragLayer from './game/CustomDragLayer';
 import CrosswordWrapper from './game/crossword/Crossword';
 
@@ -79,19 +80,6 @@ function GameInner({ user, elementSetId }) {
 
   const {nextTheme, currentThemeIndex, nextThemeIndex, setTheme} = useContext(ThemeContext)
 
-  function setElementsWithCalc(elements) {
-    for (const element of elements) {
-      element.isFinal = !elements.some(e => {
-        if (element === e || !e.madeOf) return false;
-        return e.madeOf.some(({ first, second }) =>
-          first.id === element.id || second.id === element.id
-        );
-      });
-    }
-    setElements(elements);
-    // setLastDiscoveredElements([elements[0]]);
-  }
-
   const classes = useStyles();
 
   const crosswordProgress = game && game.crosswordProgress;
@@ -117,40 +105,85 @@ function GameInner({ user, elementSetId }) {
     [game && game.discoveredElements, elements, search]
   );
 
-  const discoveredElementsById = useMemo(() => {
-    const discoveredElements = game && game.discoveredElements;
-    if (!discoveredElements) return {};
-    const dict = {};
-    for (const de of discoveredElements) {
-      dict[de.element.id] = de;
+  const isAllOpen = elements && discoveredElements &&
+    elements.length === discoveredElements.length;
+
+  function setElementsWithCalc(elements) {
+
+    for (const element of elements) {
+      element.isFinal = !elements.some(e => {
+        if (element === e || !e.madeOf) return false;
+        return e.madeOf.some(({ first, second }) =>
+          first.id === element.id || second.id === element.id
+        );
+      });
     }
-    return dict;
-  }, [game && game.discoveredElements]);
+    setElements(elements);
+  }
+
+  function madeOfIdFilter(id) {
+    return ({first, second}) => id === first.id || id === second.id;
+  }
+
+  function canBeHiddenBecauseProducedEverything(element, elements, discoveredElements) {
+    if (element.isPrimitive || element.code) return false;
+
+    for (const e of elements) {
+      if (e.id !== element.id && e.madeOf) {
+        const canProduceE = e.madeOf.some(madeOfIdFilter(element.id));
+        if (canProduceE) {
+          const de = discoveredElements.find(de => de.element.id === e.id);
+          if (de && de.madeOf) {
+            if (!de.madeOf.some(madeOfIdFilter(element.id))) {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
 
   const nonFinalDiscoveredElements = useMemo(() =>
     discoveredElements &&
     discoveredElements
       .filter(e => !e.element.isFinal && !e.hidden)
       .map(de => {
-        for (const e of elements) {
-          if (e.id !== de.element.id && e.madeOf && !discoveredElementsById[e.id]) {
-            for (const {first, second} of e.madeOf) {
-              if (de.element.id === first.id || de.element.id === second.id) {
-                return de;
-              }
-            }
-          }
+        if (canBeHiddenBecauseProducedEverything(de.element, elements, discoveredElements)) {
+          return {...de, canBeHidden: true};
+        } else {
+          return de;
         }
-        return {...de, canBeHidden: true};
       }),
     [discoveredElements, elements]
   );
 
-  let elementsOnBoard = ((game && game.elementsOnBoard) || []).map((node, index) => ({
-    ...node,
-    index,
-    element: elements.find(e => e.id === node.element.id)
-  }));
+  let elementsOnBoard = ((game && game.elementsOnBoard) || []).map((node, index) => {
+    const element = elements.find(e => e.id === node.element.id);
+    return {
+      ...node,
+      index,
+      producedEverything: canBeHiddenBecauseProducedEverything(element, elements, discoveredElements),
+      // producedEverything: !element.isPrimitive && !element.code && !elements.some(e => {
+        // if (e.id === element.id || !e.madeOf) return false;
+
+        // const canProduceE = e.madeOf.some(({first, second}) => element.id === first.id || element.id === second.id);
+        // if (canProduceE) {
+        //   const de2 = discoveredElementsById[e.id];
+        //   if (de2 && de2.madeOf) {
+        //     return !de2.madeOf.some(({first, second}) => element.id === first.id || element.id === second.id);
+        //   } else {
+        //     return true;
+        //   }
+        // }
+        // return false;
+      // }),
+      element
+    }
+  });
 
   const elementColl = db.collection(`elementSets/${elementSetId}/elements`)
   const elementRef = (id) =>
@@ -358,14 +391,22 @@ function GameInner({ user, elementSetId }) {
     });
   }, [game]);
 
-  const removeNodeFromBoard = useCallback(node => {
+  const removeNodeFromBoard = useCallback((node, hide) => {
     setGame(game => {
-      const newElementsOnBoard = game.elementsOnBoard.filter((e, i) => i !== node.index);
-      updateGame({ elementsOnBoard: newElementsOnBoard });
-      return {
-        ...game,
-        elementsOnBoard: newElementsOnBoard
+      const upd = {
+        elementsOnBoard: game.elementsOnBoard.filter((e, i) => i !== node.index),
+        discoveredElements: hide ?
+          game.discoveredElements.map(e => {
+            if (e.element.id === node.element.id) {
+              return {...e, hidden: true};
+            } else {
+              return e;
+            }
+          }) :
+          game.discoveredElements
       };
+      updateGame(upd);
+      return {...game, ...upd};
     });
   }, [game]);
 
@@ -378,7 +419,7 @@ function GameInner({ user, elementSetId }) {
         (first.id === receivingElement.id && second.id === droppedElement.id)
       )
     );
-    
+
     if (!newElements.length) {
       if (droppedNode) {
         setLastBadMixInfo({
@@ -416,8 +457,6 @@ function GameInner({ user, elementSetId }) {
       return undefined;
     });
     
-    console.log("mixElements", droppedNode, receivingNode, isNewPair, {newElementIds, alreadyFound, discoveredElements: discoveredElements.map(e => ({id: e.element.id, name: e.element.name}))})
-
     if (isNewPair || alreadyFound) {
       if (!droppedNode) {
         addElement({
@@ -602,7 +641,7 @@ function GameInner({ user, elementSetId }) {
               onSolve={onCrosswordSolve}
               onHide={() => setIsShowingCrossword(false)}
             /> : [
-            <Grid item xs={10} key="1">
+            <Grid item xs={isAllOpen ? 12 : 10} key="1">
               <MixingArea
                 onAdd={addElement}
                 onDrop={mixElements}
@@ -615,13 +654,15 @@ function GameInner({ user, elementSetId }) {
               />
               <CustomDragLayer />
             </Grid>,
-            <Grid item xs={2} key="2">
-              <Sidebar
-                elements={nonFinalDiscoveredElements}
-                onDrop={removeNodeFromBoard}
-                onHideElement={onHideElement}
-              />
+            isAllOpen ? undefined :
+              <Grid item xs={2} key="2">
+                <Sidebar
+                  elements={nonFinalDiscoveredElements}
+                  onDrop={removeNodeFromBoard}
+                  onHideElement={onHideElement}
+                />
             </Grid>]}
+          {isAllOpen && <TheEnd />}
           <Cat shown={catShown} onClick={onCatClick} />
           <Music active={musicOn} alternate={alternateMusic} />
           {encyclopediaVisible &&

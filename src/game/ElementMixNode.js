@@ -61,7 +61,7 @@ class ElementMixNode extends React.Component {
     super(props);
 
     this.state = {
-      appears: props.node.element.isFinal,
+      appears: props.node.element.isFinal || props.node.producedEverything,
       unmounted: false
     }
 
@@ -92,10 +92,10 @@ class ElementMixNode extends React.Component {
     this.onMouseOut = clearTimer;
 
     this.onClick = () => {
-      if (this.props.node.element.isFinal) {
+      if (this.props.node.element.isFinal || this.props.node.producedEverything) {
         this.setState({unmounted: true})
         setTimeout(() => {
-          this.props.onRemoveFinal(this.props.node);
+          this.props.onRemoveFinal(this.props.node, true);
         }, 200);
       }
     }
@@ -125,7 +125,7 @@ class ElementMixNode extends React.Component {
       isDragging,
       shake
     } = this.props;
-    const { element, x, y } = node;
+    const { element, producedEverything, x, y } = node; 
 
     return connectDropTarget(connectDragSource(
       <div
@@ -143,7 +143,7 @@ class ElementMixNode extends React.Component {
         onMouseOut={this.onMouseOut}
         onMouseMove={this.onMouseMove}
         onDoubleClick={this.onDoubleClick}>
-        {element.isFinal && <FinalElementEffect />}
+        {(element.isFinal || producedEverything) && <FinalElementEffect />}
         <ElementIcon element={element} shake={shake} />
       </div>
     ))
