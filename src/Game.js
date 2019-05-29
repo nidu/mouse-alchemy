@@ -662,7 +662,7 @@ function GameInner({ user, elementSetId }) {
                   onHideElement={onHideElement}
                 />
             </Grid>]}
-          {isAllOpen && <TheEnd />}
+          {isAllOpen && !isShowingCrossword && <TheEnd />}
           <Cat shown={catShown} onClick={onCatClick} />
           <Music active={musicOn} alternate={alternateMusic} />
           {encyclopediaVisible &&
