@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import cx from 'classnames';
 
@@ -9,6 +9,7 @@ import QuestionList from "./QuestionList";
 import Grid from "./Grid";
 import CheckButton from './CheckButton';
 import SolvedDialog from './SolvedDialog';
+import CrosswordDialog from './CrosswordDialog';
 
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -39,9 +40,66 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    overflow: "auto"
+    overflow: "auto",
+    position: "relative"
+  },
+  crosswordDialog: {
+    textAlign: "left",
+    position: "absolute",
+    right: 5,
+    width: 400,
+    top: 5,
   }
-}))
+}));
+
+const allPosts = {
+  empty: [
+    { personIndex: 0, text: 'Привет, путник! У меня есть кое-что для тебя, вот…' },
+    { personIndex: 1, text: 'Погодите! Если ты отдашь это так быстро – не будет интри-и-и-иги!' },
+    { personIndex: 0, text: 'Хм... верно. Тогда, господин путник, попробуй решить этот кроссворд. Если решение окажется верным, ты получишь кое-что ценное.' },
+    { personIndex: 1, text: 'В конце не забудь нажать кнопку «Прове-е-е-ерить»' },
+  ],
+  onSuccessfullCheck: [
+    { personIndex: 0, text: 'Ура! Ты справился!' },
+    { personIndex: 1, text: 'Поздравля-я-я-яю!' },
+    { personIndex: 0, text: 'Держи свой ПРИЗ!' },
+  ],
+  onFailedCheck: [
+    { personIndex: 0, text: 'Не не не.' },
+    { personIndex: 1, text: 'Кажется не вышло.' },
+    { personIndex: 0, text: 'Камбарэ!' },
+  ],
+  smalltalk: [
+    [{ personIndex: 0, text: "Говорят, где-то есть подвал доверху забитый сладостями!" },
+    { personIndex: 1, text: "Возможно, мы найдем его в нашем путешествии." }],
+
+    [{ personIndex: 0, text: "Думаешь, господин путник всё разгадает?" },
+    { personIndex: 1, text: "Конечно! Ведь всем интересно узнать, что будет в конце..." }],
+
+    [{ personIndex: 0, text: "Апчхи!" },
+    { personIndex: 1, text: "Будь здорова." }],
+
+    [{ personIndex: 0, text: "Котик скачет на лошадке," },
+    { personIndex: 0, text: "И сверкают только пятки." },
+    { personIndex: 1, text: "Шерсть вздымает выше гривы," },
+    { personIndex: 1, text: "Потому что конь ретивый!" }],
+
+    [{ personIndex: 0, text: "Может, дать подсказку…" },
+    { personIndex: 1, text: "Эй! Путник справится, верь в него!" },
+    { personIndex: 0, text: "Ты прав." }],
+
+    [{ personIndex: 0, text: "А что, если мы всего лишь картинки на экране умной машины? И в этот раз нам даже тела не нарисовали?" },
+    { personIndex: 1, text: "…" },
+    { personIndex: 0, text: "…", delay: 1000 },
+    { personIndex: 1, text: "Да не-е-е-е-е…", delay: 1000 }],
+  ]
+};
+
+const crosswordDialogImages = {
+  default: "/talk_crossword_2.png",
+  good: "/talk_crossword_2_good.png",
+  bad: "/talk_crossword_2_bad.png",
+};
 
 function Crossword({
   crossword,
@@ -54,17 +112,42 @@ function Crossword({
 }) {
   const classes = useStyles();
   const [lastFailedCheckDate, setLastFailedCheckDate] = useState();
+  const [posts, setPosts] = useState(allPosts.empty);
+  const [crosswordDialogImage, setCrosswordDialogImage] = useState(crosswordDialogImages.default);
 
   const horizontalQuestions = crossword.filter(c => c.orientation === "horizontal");
   const verticalQuestions = crossword.filter(c => c.orientation === "vertical");
 
   const onCheck = () => {
     if (checkCrossword(crossword, crosswordProgress)) {
+      // setPosts(allPosts.onSuccessfullCheck);
       onSolve();
     } else {
+      setPosts(allPosts.onFailedCheck);
+      setCrosswordDialogImage(crosswordDialogImages.bad);
       setLastFailedCheckDate(new Date().toISOString());
     }
   }
+
+  useEffect(() => {
+    if (crosswordSolved) {
+      setPosts(allPosts.onSuccessfullCheck);
+      setCrosswordDialogImage(crosswordDialogImages.good);
+    }
+  }, [crosswordSolved]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!crosswordSolved) {
+        const index = Math.round(Math.random() * (allPosts.smalltalk.length - 1));
+        console.log("Smalltalk", index, allPosts.smalltalk[index]);
+        setPosts(allPosts.smalltalk[index]);
+        setCrosswordDialogImage(crosswordDialogImages.default);
+      }
+    }, 30000 + Math.random() * 60000);
+
+    return () => clearTimeout(timeout);
+  }, [crosswordSolved, posts]);
 
   return (
     <div className={classes.container}>
@@ -75,6 +158,11 @@ function Crossword({
       </div>
 
       <div className={classes.grid}>
+        <CrosswordDialog 
+          posts={posts} 
+          className={classes.crosswordDialog}
+          image={crosswordDialogImage}
+        ></CrosswordDialog>
         <CheckButton
           onCheck={onCheck}
           lastFailedCheckDate={lastFailedCheckDate}
