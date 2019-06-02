@@ -64,3 +64,7 @@ export function useShaker({steps, shake, interval, shakeOnMount}) {
 
   return step;
 }
+
+export function isDebug() {
+  return document.location.search.indexOf("debug=true") !== -1;
+}

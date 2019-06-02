@@ -12,12 +12,16 @@ import SolvedDialog from './SolvedDialog';
 import CrosswordDialog from './CrosswordDialog';
 
 import CloseIcon from '@material-ui/icons/Close';
+import { isDebug } from '../../common';
+
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
     paddingLeft: 60,
     paddingRight: 60,
     width: "100%",
+    height: "100%",
     background: theme.game.background.default,
     color: theme.game.text.default
   },
@@ -31,7 +35,7 @@ const useStyles = makeStyles(theme => ({
     flex: "1 0 200px",
     display: "flex",
     flexDirection: "column",
-    height: "calc(100vh - 80px)"
+    height: "calc(100vh - 100px)"
   },
   grid: {
     flex: "auto",
@@ -49,6 +53,9 @@ const useStyles = makeStyles(theme => ({
     right: 5,
     width: 400,
     top: 5,
+  },
+  takePrizeBtn: {
+    color: "#f25e5e"
   }
 }));
 
@@ -62,7 +69,7 @@ const allPosts = {
   onSuccessfullCheck: [
     { personIndex: 0, text: 'Ура! Ты справился!' },
     { personIndex: 1, text: 'Поздравля-я-я-яю!' },
-    { personIndex: 0, text: 'Держи свой ПРИЗ!' },
+    { personIndex: 0, text: 'Скорее забирай свой приз!' },
   ],
   onFailedCheck: [
     { personIndex: 0, text: 'Не не не.' },
@@ -114,6 +121,7 @@ function Crossword({
   const [lastFailedCheckDate, setLastFailedCheckDate] = useState();
   const [posts, setPosts] = useState(allPosts.empty);
   const [crosswordDialogImage, setCrosswordDialogImage] = useState(crosswordDialogImages.default);
+  const [showSolvedDialog, setShowSolvedDialog] = useState(false);
 
   const horizontalQuestions = crossword.filter(c => c.orientation === "horizontal");
   const verticalQuestions = crossword.filter(c => c.orientation === "vertical");
@@ -151,22 +159,29 @@ function Crossword({
 
   return (
     <div className={classes.container}>
-      {crosswordSolved && <SolvedDialog open onClose={onHide} hint={crosswordHint} />}
       <div className={cx(classes.horizontalQuestions, classes.questions)}>
         <Typography variant="h4">По горизонтали</Typography>
         <QuestionList questions={horizontalQuestions} />
       </div>
 
       <div className={classes.grid}>
-        <CrosswordDialog 
-          posts={posts} 
+        <CrosswordDialog
+          posts={posts}
           className={classes.crosswordDialog}
           image={crosswordDialogImage}
         ></CrosswordDialog>
-        <CheckButton
-          onCheck={onCheck}
-          lastFailedCheckDate={lastFailedCheckDate}
-        />
+        {crosswordSolved ?
+          <Button className={classes.takePrizeBtn} onClick={() => setShowSolvedDialog(true)}>Забрать приз</Button> :
+          <CheckButton
+            onCheck={onCheck}
+            lastFailedCheckDate={lastFailedCheckDate}
+          />}
+        {isDebug() && <Button
+          onClick={() => onChange(fillCrossword(crossword, crosswordProgress))}
+        >Заполнить</Button>}
+        {isDebug() && <Button
+          onClick={() => onChange({})}
+        >Очистить</Button>}
         <Grid
           crossword={crossword}
           crosswordProgress={crosswordProgress}
@@ -178,6 +193,8 @@ function Crossword({
         <Typography variant="h4">По вертикали</Typography>
         <QuestionList questions={verticalQuestions} />
       </div>
+
+      {crosswordSolved && showSolvedDialog && <SolvedDialog open onClose={() => setShowSolvedDialog(false)} hint={crosswordHint} />}
     </div>
   )
 }
@@ -234,4 +251,24 @@ export function checkCrossword(crossword, crosswordProgress) {
   }
 
   return true;
+}
+
+function fillCrossword(crossword, crosswordProgress) {
+  crosswordProgress = {};
+
+  for (const q of crossword) {
+    for (let i = 0; i < q.text.length; i++) {
+      let { x, y } = q;
+      if (q.orientation === "horizontal") {
+        x += i;
+      } else {
+        y += i;
+      }
+      const key = `${x}.${y}`;
+      const c1 = q.text[i].toLowerCase();
+      crosswordProgress[key] = c1;
+    }
+  }
+
+  return crosswordProgress;
 }

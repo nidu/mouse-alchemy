@@ -49,7 +49,7 @@ export default function AuthForm({ onAuth }) {
             vertical: 'top',
             horizontal: 'center',
           }}
-          open={error}
+          open={error !== null && error !== undefined}
           autoHideDuration={6000}
           onClose={() => setError()}
           ContentProps={{

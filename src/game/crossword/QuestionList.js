@@ -1,12 +1,14 @@
 import React from "react";
 import { makeStyles } from "@material-ui/styles";
 import Typography from '@material-ui/core/Typography';
+import PerfectScrollbar from 'react-perfect-scrollbar';
+import 'react-perfect-scrollbar/dist/css/styles.css';
 
 const useStyles = makeStyles(theme => {
   console.log("Theme", theme);
   return {
     container: {
-      overflow: "auto"
+      // overflow: "auto"
     },
     questionList: {
       fontFamily: theme.typography.fontFamily,
@@ -31,9 +33,11 @@ export default function QuestionList({ questions }) {
 
   return (
     <div className={classes.container}>
-      <ol className={classes.questionList}>
-        {listItems}
-      </ol>
+      <PerfectScrollbar>
+        <ol className={classes.questionList}>
+          {listItems}
+        </ol>
+      </PerfectScrollbar>
     </div>
   )
 }
