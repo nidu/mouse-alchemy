@@ -72,8 +72,8 @@ const allPosts = {
     { personIndex: 0, text: 'Скорее забирай свой приз!' },
   ],
   onFailedCheck: [
-    { personIndex: 0, text: 'Не не не.' },
-    { personIndex: 1, text: 'Кажется не вышло.' },
+    { personIndex: 0, text: 'Боюсь тебя огорчать…' },
+    { personIndex: 1, text: 'Что-то не верно! Попытайся исправить!' },
     { personIndex: 0, text: 'Камбарэ!' },
   ],
   smalltalk: [
